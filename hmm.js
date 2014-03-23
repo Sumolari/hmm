@@ -23,8 +23,8 @@
  *                                                                 States of
  *                                                                 the model.
  * @param {HMMState}                         finalState            Optional.
- *                                                                 States of
- *                                                                 he model.
+ *                                                                 Final state
+ *                                                                 of the model.
  * @param {[HMMSymbol]}                      symbols               Optional.
  *                                                                 Symbols of
  *                                                                 the model.
