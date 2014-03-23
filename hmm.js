@@ -165,7 +165,8 @@ module.exports = function (
 
 		str += "\nInitial:\n";
 		for ( s in this.states )
-			str += this.states[ s ] + ":\t" + this.ip( this.states[ s ] ) + "\n";
+			str += this.states[ s ] + ":\t" +
+				this.ip( this.states[ s ] ) + "\n";
 		str += "\nFinal: " + this.finalState;
 
 		return str;
