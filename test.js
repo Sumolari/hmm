@@ -2,7 +2,19 @@
 
 var assert = require( 'assert' ),
 	hmm = require( './hmm.js' ),
-	model;
+	model, case_1 = {
+		item: [ 'b', 'c', 'b', 'a' ],
+		viterbi: 0.006804,
+		forward: 0.007339
+	}, case_2 = {
+		item: [ 'b', 'c', 'b', 'b' ],
+		viterbi: 0,
+		forward: 0
+	}, case_3 = {
+		item: [ 'b', 'c', 'b', 'd' ],
+		viterbi: 0,
+		forward: 0
+	};
 
 // Tests.
 
@@ -46,11 +58,73 @@ describe( 'Hidden Markov Model', function () {
 		done();
 	} );
 
-	it( "Generation Probability should return the Viterbi Approximation", function ( done ) {
+	it( "Recursive Viterbi Approximation returns approximated probability",
+		function ( done ) {
+			assert.equal(
+				model.viterbiRecursive( case_1.item ), case_1.viterbi );
+			done();
+		} );
 
-		assert.equal( model.generationProbability( [ 'b', 'c', 'b', 'a' ] ), 0.006804 );
-		done();
+	it( "Dynamic Viterbi Approximation returns approximated probability",
+		function ( done ) {
+			assert.equal(
+				model.viterbiDynamic( case_1.item ), case_1.viterbi );
+			done();
+		} );
 
-	} );
+	it( "Forward Probabilty returns real probability",
+		function ( done ) {
+			assert.equal(
+				model.forwardProbability( case_1.item ), case_1.forward );
+			done();
+		} );
+
+	it( "Recursive Viterbi Approximation returns approximated probability even" +
+		" if it not possible to generate that item",
+		function ( done ) {
+			assert.equal(
+				model.viterbiRecursive( case_2.item ), case_2.viterbi );
+			done();
+		} );
+
+	it( "Dynamic Viterbi Approximation returns approximated probability even " +
+		"if it not possible to generate that item",
+		function ( done ) {
+			assert.equal(
+				model.viterbiDynamic( case_2.item ), case_2.viterbi );
+			done();
+		} );
+
+	it( "Forward Probabilty returns real probability even if it not possible " +
+		"to generate that item",
+		function ( done ) {
+			assert.equal(
+				model.forwardProbability( case_2.item ), case_2.forward );
+			done();
+		} );
+
+	it( "Recursive Viterbi Approximation returns approximated probability even" +
+		" if it has non existing symbols",
+		function ( done ) {
+			assert.equal(
+				model.viterbiRecursive( case_3.item ), case_3.viterbi );
+			done();
+		} );
+
+	it( "Dynamic Viterbi Approximation returns approximated probability even " +
+		"if it has non existing symbols",
+		function ( done ) {
+			assert.equal(
+				model.viterbiDynamic( case_3.item ), case_3.viterbi );
+			done();
+		} );
+
+	it( "Forward Probabilty returns real probability even if it has non " +
+		"existing symbols ",
+		function ( done ) {
+			assert.equal(
+				model.forwardProbability( case_3.item ), case_3.forward );
+			done();
+		} );
 
 } );
