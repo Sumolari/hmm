@@ -191,9 +191,23 @@ module.exports = function (
 
 	/**
 	 * Returns the Viterbi approximation to the probability of this model
-	 * generating given item.
+	 * generating given item using the fastest implementation available.
 	 * @private
 	 * @method  viterbiApproximation
+	 * @param  {[HMMSymbol]} item  Item whose generation probability will be
+	 *                             returned.
+	 * @return {Probability}       Viterbi approximation to the probability
+	 *                             of this markov model generating given item.
+	 */
+	this.viterbiApproximation = function ( item ) {
+		return this.viterbiDynamic( item );
+	};
+
+	/**
+	 * Returns the Viterbi approximation to the probability of this model
+	 * generating given item with a recursive implementation.
+	 * @private
+	 * @method  viterbiRecursive
 	 * @param  {[HMMSymbol]} item  Item whose generation probability will be
 	 *                             returned.
 	 * @param  {[HMMState]}  state Optional. Initial state for computation.
@@ -202,7 +216,7 @@ module.exports = function (
 	 * @return {Probability}       Viterbi approximation to the probability
 	 *                             of this markov model generating given item.
 	 */
-	this.viterbiApproximation = function ( item, state ) {
+	this.viterbiRecursive = function ( item, state ) {
 		var i,
 			c,
 			s = item[ 0 ],
@@ -224,7 +238,7 @@ module.exports = function (
 		};
 
 		for ( i in this.states ) {
-			var prob = this.viterbiApproximation( rest, this.states[ i ] );
+			var prob = this.viterbiRecursive( rest, this.states[ i ] );
 			if ( prob >= bestDestination.probability ) {
 				bestDestination.probability = prob;
 				bestDestination.state = this.states[ i ];
@@ -233,7 +247,116 @@ module.exports = function (
 
 		var etp = this.ep( state, s ) * this.tp( state, bestDestination.state );
 
-		return etp * bestDestination.probability;
+		return ( etp * bestDestination.probability ).toFixed( 6 );
+	};
+
+	/**
+	 * Returns the Viterbi approximation to the probability of this model
+	 * generating given item.
+	 * @private
+	 * @method  viterbiDynamic
+	 * @param  {[HMMSymbol]} item  Item whose generation probability will be
+	 *                             returned.
+	 * @param  {[HMMState]}  state Optional. Initial state for computation.
+	 *                             If no state is given then the most probable
+	 *                             initial state is used.
+	 * @return {Probability}       Viterbi approximation to the probability
+	 *                             of this markov model generating given item.
+	 */
+	this.viterbiDynamic = function ( item ) {
+
+		var V = [ {} ],
+			path = {},
+			max, i, j, state, calc, newpath, s;
+
+		for ( i in this.states ) {
+			state = this.states[ i ];
+			V[ 0 ][ state ] = this.ip( state ) * this.ep( state, item[ 0 ] );
+			path[ state ] = [ state ];
+		}
+
+		for ( var t = 1; t < item.length; t++ ) {
+			V.push( {} );
+			newpath = {};
+
+			for ( i in this.states ) {
+				state = this.states[ i ];
+				max = [ 0, null ];
+				for ( j in this.states ) {
+					s = this.states[ j ];
+					var tep = this.tp( s, state ) * this.ep( state, item[ t ] );
+					calc = V[ t - 1 ][ s ] * tep;
+					if ( calc >= max[ 0 ] ) max = [ calc, s ];
+				}
+				V[ t ][ state ] = max[ 0 ];
+				newpath[ state ] = path[ max[ 1 ] ].concat( state );
+			}
+			path = newpath;
+		}
+
+		V.push( {} );
+		newpath = {};
+
+		max = [ 0, null ];
+		for ( j = 0; j < this.states.length; j++ ) {
+			s = this.states[ j ];
+			calc = V[ t - 1 ][ s ] * this.tp( s, this.finalState );
+			if ( calc >= max[ 0 ] ) max = [ calc, s ];
+		}
+		V[ item.length ][ state ] = max[ 0 ];
+		path[ state ] = path[ max[ 1 ] ].concat( state );
+
+		max = [ 0, null ];
+		for ( i = 0; i < this.states.length; i++ ) {
+			state = this.states[ i ];
+			if ( V[ item.length ] ) calc = V[ item.length ][ state ];
+			else calc = 0;
+			if ( calc > max[ 0 ] ) max = [ calc, state ];
+		}
+
+		//console.log( [ max[ 0 ], path[ max[ 1 ] ] ] );
+
+		return max[ 0 ].toFixed( 6 );
+	};
+
+	/**
+	 * Returns the probability of this model generating given item.
+	 * Please note that this method is much more expensive than the Viterbi
+	 * Approximation and the results are similar.
+	 * @private
+	 * @method  forwardProbability
+	 * @param  {[HMMSymbol]} item  Item whose generation probability will be
+	 *                             returned.
+	 * @param  {[HMMState]}  state Optional. Initial state for computation.
+	 *                             If no state is given then the most probable
+	 *                             initial state is used.
+	 * @return {Probability}       Viterbi approximation to the probability
+	 *                             of this markov model generating given item.
+	 */
+	this.forwardProbability = function ( item, state ) {
+		var i,
+			c,
+			s = item[ 0 ],
+			rest = item.slice( 1 ),
+			probability = 0;
+
+		if ( state === undefined )
+			for ( i in this.initialProbability ) {
+				c = this.ep( state, s ) * this.ip( state );
+				if ( c < this.ep( i, s ) * this.ip( i ) )
+					state = i;
+			}
+
+		if ( item.length === 1 )
+			return this.ep( state, s ) * this.tp( state, this.finalState );
+
+		for ( i in this.states ) {
+			var tpp = this.tp( state, this.states[ i ] );
+			var tpfp = this.forwardProbability( rest, this.states[ i ] );
+			probability += tpp * tpfp;
+		}
+
+		return ( probability * this.ep( state, s ) ).toFixed( 6 );
 	};
 
 	/**
