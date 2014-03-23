@@ -192,7 +192,7 @@ module.exports = function (
 	 * Returns the Viterbi approximation to the probability of this model
 	 * generating given item.
 	 * @private
-	 * @method  viertbiApproximation
+	 * @method  viterbiApproximation
 	 * @param  {[HMMSymbol]} item  Item whose generation probability will be
 	 *                             returned.
 	 * @param  {[HMMState]}  state Optional. Initial state for computation.
