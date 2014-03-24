@@ -206,7 +206,15 @@ module.exports = function (
 			paths = [],
 			path,
 			transition,
-			i, j, src, dst, prob, sum, item, sym;
+			i, j, src, dst, prob, sum, item, sym,
+			original = {
+				st: this.states,
+				sy: this.symbols,
+				fs: this.finalState,
+				ip: this.initialProbability,
+				tp: JSON.stringify( this.transitionProbability ),
+				ep: JSON.stringify( this.emissionProbability )
+			};
 
 		for ( i in items )
 			paths.push( this.viterbi( items[ i ] ).path );
@@ -260,6 +268,16 @@ module.exports = function (
 				this.emissionProbability[ src ][ sym ] = prob;
 			}
 		}
+
+		if (
+			original.st !== this.states ||
+			original.sy !== this.symbols ||
+			original.fs !== this.finalState ||
+			original.ip !== this.initialProbability ||
+			original.tp !== JSON.stringify( this.transitionProbability ) ||
+			original.ep !== JSON.stringify( this.emissionProbability )
+		)
+			this.reestimate( items );
 
 	};
 
