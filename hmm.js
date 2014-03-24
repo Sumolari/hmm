@@ -200,54 +200,7 @@ module.exports = function (
 	 *                             of this markov model generating given item.
 	 */
 	this.viterbiApproximation = function ( item ) {
-		return this.viterbiDynamic( item );
-	};
-
-	/**
-	 * Returns the Viterbi approximation to the probability of this model
-	 * generating given item with a recursive implementation.
-	 * @private
-	 * @method  viterbiRecursive
-	 * @param  {[HMMSymbol]} item  Item whose generation probability will be
-	 *                             returned.
-	 * @param  {[HMMState]}  state Optional. Initial state for computation.
-	 *                             If no state is given then the most probable
-	 *                             initial state is used.
-	 * @return {Probability}       Viterbi approximation to the probability
-	 *                             of this markov model generating given item.
-	 */
-	this.viterbiRecursive = function ( item, state ) {
-		var i,
-			c,
-			s = item[ 0 ],
-			rest = item.slice( 1 );
-
-		if ( state === undefined )
-			for ( i in this.initialProbability ) {
-				c = this.ep( state, s ) * this.ip( state );
-				if ( c < this.ep( i, s ) * this.ip( i ) )
-					state = i;
-			}
-
-		if ( item.length === 1 )
-			return this.ep( state, s ) * this.tp( state, this.finalState );
-
-		var bestDestination = {
-			state: null,
-			probability: 0
-		};
-
-		for ( i in this.states ) {
-			var prob = this.viterbiRecursive( rest, this.states[ i ] );
-			if ( prob >= bestDestination.probability ) {
-				bestDestination.probability = prob;
-				bestDestination.state = this.states[ i ];
-			}
-		}
-
-		var etp = this.ep( state, s ) * this.tp( state, bestDestination.state );
-
-		return ( etp * bestDestination.probability ).toFixed( 6 );
+		return this.viterbi( item ).probability;
 	};
 
 	/**
@@ -263,7 +216,7 @@ module.exports = function (
 	 * @return {Probability}       Viterbi approximation to the probability
 	 *                             of this markov model generating given item.
 	 */
-	this.viterbiDynamic = function ( item ) {
+	this.viterbi = function ( item ) {
 
 		var V = [ {} ],
 			path = {},
@@ -314,9 +267,10 @@ module.exports = function (
 			if ( calc > max[ 0 ] ) max = [ calc, state ];
 		}
 
-		//console.log( [ max[ 0 ], path[ max[ 1 ] ] ] );
-
-		return max[ 0 ].toFixed( 6 );
+		return {
+			probability: max[ 0 ].toFixed( 6 ),
+			path: path[ max[ 1 ] ]
+		};
 	};
 
 	/**
@@ -370,6 +324,16 @@ module.exports = function (
 	 */
 	this.generationProbability = function ( item ) {
 		return this.viterbiApproximation( item );
+	};
+
+	/**
+	 * Returns most probable sequence of states generating given item (if any).
+	 * @param  {[HMMSymbol]} item Item whose optimal state sequence will be
+	 *                            returned.
+	 * @return {[HMMState]}       Optimal state sequence generating given item.
+	 */
+	this.optimalStateSequence = function ( item ) {
+		return this.viterbi( item ).path;
 	};
 
 };
