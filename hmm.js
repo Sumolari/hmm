@@ -296,66 +296,42 @@ module.exports = function (
 
 	};
 
+	/**
+	 * Initializes this model with given items.
+	 * @method initialize
+	 * @uses   reestimate
+	 * @param  {[[HMMSymbol]]} items Items used to reestimate this model.
+	 * @param  {Integer}       n     Number of states to use in this model.
+	 */
+	this.initialize = function ( items, n ) {
+
+		var i, j, s, path, item, paths = [];
+
+		this.symbols = [];
+		this.states = [];
 		this.finalState = 'F';
-		this.transitionProbability = {};
-		this.emissionProbability = {};
 
-		for ( i in paths )
-			if ( initials[ paths[ i ][ 0 ] ] )
-				initials[ paths[ i ][ 0 ] ]++;
-			else
-				initials[ paths[ i ][ 0 ] ] = 1;
+		for ( i in items )
+			for ( j in items[ i ] )
+				if ( this.symbols.indexOf( items[ i ][ j ] ) < 0 )
+					this.symbols.push( items[ i ][ j ] );
 
-		for ( i in initials )
-			this.initialProbability[ i ] = initials[ i ] / paths.length;
+		for ( i = 1; i <= n; i++ )
+			this.states.push( '' + i );
+		this.states.push( this.finalState );
 
-		sum = {};
-		for ( i in paths ) {
-			path = paths[ i ];
+		for ( i in items ) {
+			path = [];
 			item = items[ i ];
-			for ( j = 0; j < path.length - 1; j++ ) {
-				src = path[ j ];
-				dst = path[ j + 1 ];
-				if ( !sum[ src ] ) sum[ src ] = 0;
-				sum[ src ]++;
-				if ( !transitions[ src ] ) transitions[ src ] = {};
-				if ( !transitions[ src ][ dst ] ) transitions[ src ][ dst ] = 0;
-				transitions[ src ][ dst ]++;
-				if ( !symbols[ src ] ) symbols[ src ] = {};
-				if ( !symbols[ src ][ item[ j ] ] )
-					symbols[ src ][ item[ j ] ] = 0;
-				symbols[ src ][ item[ j ] ]++;
+			for ( j = 1; j <= item.length; j++ ) {
+				s = Math.floor( ( j ) * n / ( item.length + 1 ) ) + 1;
+				path.push( '' + s );
 			}
+			path.push( this.finalState );
+			paths.push( path );
 		}
 
-		for ( src in transitions ) {
-			transition = transitions[ src ];
-			for ( dst in transition ) {
-				if ( !this.transitionProbability[ src ] )
-					this.transitionProbability[ src ] = {};
-				prob = transition[ dst ] / sum[ src ];
-				this.transitionProbability[ src ][ dst ] = prob;
-			}
-			for ( sym in symbols[  src ] ) {
-				if ( !this.emissionProbability[ src ] )
-					this.emissionProbability[ src ] = {};
-				if ( !this.emissionProbability[ src ][ sym ] )
-					this.emissionProbability[ src ][ sym ] = 0;
-				prob = symbols[ src ][ sym ] / sum[ src ];
-				this.emissionProbability[ src ][ sym ] = prob;
-			}
-		}
-
-		if (
-			original.st !== this.states ||
-			original.sy !== this.symbols ||
-			original.fs !== this.finalState ||
-			original.ip !== this.initialProbability ||
-			original.tp !== JSON.stringify( this.transitionProbability ) ||
-			original.ep !== JSON.stringify( this.emissionProbability )
-		)
-			this.reestimate( items );
-
+		this.reestimate( items, paths );
 	};
 
 	/**

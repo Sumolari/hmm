@@ -15,6 +15,10 @@ var assert = require( 'assert' ),
 		item: [ 'b', 'c', 'b', 'd' ],
 		viterbi: 0,
 		forward: 0
+	}, case_4 = {
+		item: [ 'white', 'bottle' ],
+		trained: 1,
+		n: 2
 	};
 
 // Tests.
@@ -106,7 +110,7 @@ describe( 'Hidden Markov Model', function () {
 		} );
 
 	it( "After reestimating the model with one sample the probability of " +
-		"generating that sample is 100%", function ( done ) {
+		"generating that sample is higher", function ( done ) {
 			model.reestimate( [ case_1.item ] );
 			assert.equal(
 				model.viterbiApproximation( case_1.item ),
@@ -114,6 +118,31 @@ describe( 'Hidden Markov Model', function () {
 			assert.equal(
 				model.forwardProbability( case_1.item ),
 				case_1.trained );
+			done();
+		} );
+
+	it( "After initialising the model with a sample the probability of " +
+		"generating the sample is 100%", function ( done ) {
+			model = new hmm();
+			model.initialize( [ case_4.item ], case_4.n );
+			assert.equal(
+				model.viterbiApproximation( case_4.item ),
+				case_4.trained );
+			assert.equal(
+				model.forwardProbability( case_4.item ),
+				case_4.trained );
+			done();
+		} );
+
+	it( "After initialising the model with some samples the probability of " +
+		"any one of them is bigger than 0", function ( done ) {
+			model = new hmm();
+			var cases = [ case_1.item, case_2.item, case_3.item, case_4.item ];
+			model.initialize( cases, cases.length );
+			for ( var i in cases ) {
+				assert.ok( model.viterbiApproximation( cases[ i ] ) > 0 );
+				assert.ok( model.forwardProbability( cases[ i ] ) > 0 );
+			}
 			done();
 		} );
 
