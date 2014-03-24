@@ -198,26 +198,103 @@ module.exports = function (
 	 * @method reestimate
 	 * @uses   optimalStateSequence
 	 * @param  {[[HMMSymbol]]} items Items used to reestimate this model.
+	 * @param  {[[HMMState]]}  path  Optional. Array of optimal paths for each
+	 *                               one of given items. If no paths are given
+	 *                               they are computed with Viterbi algorithm.
 	 */
-	this.reestimate = function ( items ) {
-		var initials = {},
-			transitions = {},
-			symbols = {},
-			paths = [],
-			path,
-			transition,
-			i, j, src, dst, prob, sum, item, sym,
-			original = {
-				st: this.states,
-				sy: this.symbols,
-				fs: this.finalState,
-				ip: this.initialProbability,
-				tp: JSON.stringify( this.transitionProbability ),
-				ep: JSON.stringify( this.emissionProbability )
-			};
+	this.reestimate = function ( items, paths ) {
 
-		for ( i in items )
-			paths.push( this.viterbi( items[ i ] ).path );
+		var shouldRepeat = true;
+
+		while ( shouldRepeat ) {
+
+			var initials = {},
+				transitions = {},
+				symbols = {},
+				path,
+				transition,
+				i, j, src, dst, prob, sum, item, sym,
+				original = {
+					st: this.states,
+					sy: this.symbols,
+					fs: this.finalState,
+					ip: this.initialProbability,
+					tp: JSON.stringify( this.transitionProbability ),
+					ep: JSON.stringify( this.emissionProbability )
+				};
+
+			if ( paths === undefined ) {
+				paths = [];
+				for ( i in items )
+					paths.push( this.viterbi( items[ i ] ).path );
+			}
+
+			this.finalState = 'F';
+			this.transitionProbability = {};
+			this.emissionProbability = {};
+
+			for ( i in paths )
+				if ( initials[ paths[ i ][ 0 ] ] )
+					initials[ paths[ i ][ 0 ] ]++;
+				else
+					initials[ paths[ i ][ 0 ] ] = 1;
+
+			for ( i in initials )
+				this.initialProbability[ i ] = initials[ i ] / paths.length;
+
+			sum = {};
+			for ( i in paths ) {
+				path = paths[ i ];
+				item = items[ i ];
+				for ( j = 0; j < path.length - 1; j++ ) {
+					src = path[ j ];
+					dst = path[ j + 1 ];
+					if ( !sum[ src ] )
+						sum[ src ] = 0;
+					sum[ src ]++;
+					if ( !transitions[ src ] )
+						transitions[ src ] = {};
+					if ( !transitions[ src ][ dst ] )
+						transitions[ src ][ dst ] = 0;
+					transitions[ src ][ dst ]++;
+					if ( !symbols[ src ] )
+						symbols[ src ] = {};
+					if ( !symbols[ src ][ item[ j ] ] )
+						symbols[ src ][ item[ j ] ] = 0;
+					symbols[ src ][ item[ j ] ]++;
+				}
+			}
+
+			for ( src in transitions ) {
+				transition = transitions[ src ];
+				for ( dst in transition ) {
+					if ( !this.transitionProbability[ src ] )
+						this.transitionProbability[ src ] = {};
+					prob = transition[ dst ] / sum[ src ];
+					this.transitionProbability[ src ][ dst ] = prob;
+				}
+				for ( sym in symbols[  src ] ) {
+					if ( !this.emissionProbability[ src ] )
+						this.emissionProbability[ src ] = {};
+					if ( !this.emissionProbability[ src ][ sym ] )
+						this.emissionProbability[ src ][ sym ] = 0;
+					prob = symbols[ src ][ sym ] / sum[ src ];
+					this.emissionProbability[ src ][ sym ] = prob;
+				}
+			}
+
+			shouldRepeat = original.st !== this.states;
+			shouldRepeat = shouldRepeat || original.sy !== this.symbols;
+			shouldRepeat = shouldRepeat || original.fs !== this.finalState;
+			shouldRepeat = shouldRepeat ||
+				original.ip !== this.initialProbability;
+			shouldRepeat = shouldRepeat ||
+				original.tp !== JSON.stringify( this.transitionProbability );
+			shouldRepeat = shouldRepeat ||
+				original.ep !== JSON.stringify( this.emissionProbability );
+		}
+
+	};
 
 		this.finalState = 'F';
 		this.transitionProbability = {};
