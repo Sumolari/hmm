@@ -5,7 +5,8 @@ var assert = require( 'assert' ),
 	model, case_1 = {
 		item: [ 'b', 'c', 'b', 'a' ],
 		viterbi: 0.006804,
-		forward: 0.007339
+		forward: 0.007339,
+		trained: 0.062500
 	}, case_2 = {
 		item: [ 'b', 'c', 'b', 'b' ],
 		viterbi: 0,
@@ -104,11 +105,15 @@ describe( 'Hidden Markov Model', function () {
 			done();
 		} );
 
-	it( "Forward Probabilty returns real probability even if it has non " +
-		"existing symbols ",
-		function ( done ) {
+	it( "After reestimating the model with one sample the probability of " +
+		"generating that sample is 100%", function ( done ) {
+			model.reestimate( [ case_1.item ] );
 			assert.equal(
-				model.forwardProbability( case_3.item ), case_3.forward );
+				model.viterbiApproximation( case_1.item ),
+				case_1.trained );
+			assert.equal(
+				model.forwardProbability( case_1.item ),
+				case_1.trained );
 			done();
 		} );
 

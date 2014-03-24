@@ -182,11 +182,71 @@ module.exports = function (
 
 	/**
 	 * Adds given item to this HMM, training the model to properly classify it.
-	 * @method  train
-	 * @param  {[HMMSymbol]} item Item to add to this model.
+	 * @method  reestimate
+	 * @param  {[[HMMSymbol]]} items Items used to reestimate this model.
 	 */
-	this.train = function ( item ) {
-		console.error( 'NOT IMPLEMENTED YET' );
+	this.reestimate = function ( items ) {
+		var initials = {},
+			transitions = {},
+			symbols = {},
+			paths = [],
+			path,
+			transition,
+			i, j, src, dst, prob, sum, item, sym;
+
+		for ( i in items )
+			paths.push( this.viterbi( items[ i ] ).path );
+
+		this.finalState = 'F';
+		this.transitionProbability = {};
+		this.emissionProbability = {};
+
+		for ( i in paths )
+			if ( initials[ paths[ i ][ 0 ] ] )
+				initials[ paths[ i ][ 0 ] ]++;
+			else
+				initials[ paths[ i ][ 0 ] ] = 1;
+
+		for ( i in initials )
+			this.initialProbability[ i ] = initials[ i ] / paths.length;
+
+		sum = {};
+		for ( i in paths ) {
+			path = paths[ i ];
+			item = items[ i ];
+			for ( j = 0; j < path.length - 1; j++ ) {
+				src = path[ j ];
+				dst = path[ j + 1 ];
+				if ( !sum[ src ] ) sum[ src ] = 0;
+				sum[ src ]++;
+				if ( !transitions[ src ] ) transitions[ src ] = {};
+				if ( !transitions[ src ][ dst ] ) transitions[ src ][ dst ] = 0;
+				transitions[ src ][ dst ]++;
+				if ( !symbols[ src ] ) symbols[ src ] = {};
+				if ( !symbols[ src ][ item[ j ] ] )
+					symbols[ src ][ item[ j ] ] = 0;
+				symbols[ src ][ item[ j ] ]++;
+			}
+		}
+
+		for ( src in transitions ) {
+			transition = transitions[ src ];
+			for ( dst in transition ) {
+				if ( !this.transitionProbability[ src ] )
+					this.transitionProbability[ src ] = {};
+				prob = transition[ dst ] / sum[ src ];
+				this.transitionProbability[ src ][ dst ] = prob;
+			}
+			for ( sym in symbols[  src ] ) {
+				if ( !this.emissionProbability[ src ] )
+					this.emissionProbability[ src ] = {};
+				if ( !this.emissionProbability[ src ][ sym ] )
+					this.emissionProbability[ src ][ sym ] = 0;
+				prob = symbols[ src ][ sym ] / sum[ src ];
+				this.emissionProbability[ src ][ sym ] = prob;
+			}
+		}
+
 	};
 
 	/**
