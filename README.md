@@ -96,14 +96,14 @@ You can check internal details of the model with `print` method, which will prin
 
 ```bash
 > milk.print();
-A	1	2	F	
-1	0	1	0	
-2	0	0	1	
-F	0	0	0	
+A	1	2	F
+1	0	1	0
+2	0	0	1
+F	0	0	0
 
-B	white	bottle	
-1	1	0	
-2	0	1	
+B	white	bottle
+1	1	0
+2	0	1
 
 Initial:
 1:	1
@@ -117,5 +117,5 @@ Final: F
 
 There are 2 Make tasks provided:
 
-* `make test` will run Mocha tests. 
+* `make test` will run Mocha tests.
 * `make doc` will create the documentation folder (`doc`). You'll need Yuidoc to get the documentation.
