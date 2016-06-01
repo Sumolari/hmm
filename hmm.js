@@ -43,11 +43,7 @@
  * @return {HMM} New Hidden Markov Model.
  */
 module.exports = function (
-	states,
-	finalState,
-	symbols,
-	initialProbability,
-	transitionProbability,
+	states, finalState, symbols, initialProbability, transitionProbability,
 	emissionProbability ) {
 
 	/**
@@ -64,7 +60,7 @@ module.exports = function (
 	 * @type {HMMState}
 	 * @private
 	 */
-	this.finalState = finalState || "";
+	this.finalState = finalState || '';
 
 	/**
 	 * Set of observable symbols.
@@ -150,36 +146,33 @@ module.exports = function (
 	this.toString = function () {
 		var str, s, t;
 
-		str = "A\t";
-		for ( s in this.states )
-			str += this.states[ s ] + "\t";
-		str += "\n";
+		str = 'A\t';
+		for ( s in this.states ) str += this.states[ s ] + '\t';
+		str += '\n';
 
 		for ( s in this.states ) {
-			str += this.states[ s ] + "\t";
+			str += this.states[ s ] + '\t';
 			for ( t in this.states )
-				str += this.tp( this.states[ s ], this.states[ t ] ) + "\t";
-			str += "\n";
+				str += this.tp( this.states[ s ], this.states[ t ] ) + '\t';
+			str += '\n';
 		}
 
-		str += "\nB\t";
-		for ( s in this.symbols )
-			str += this.symbols[ s ] + "\t";
-		str += "\n";
+		str += '\nB\t';
+		for ( s in this.symbols ) str += this.symbols[ s ] + '\t';
+		str += '\n';
 
 		for ( s in this.states ) {
 			if ( this.states[  s ] === this.finalState ) continue;
-			str += this.states[ s ] + "\t";
+			str += this.states[ s ] + '\t';
 			for ( t in this.symbols )
-				str += this.ep( this.states[ s ], this.symbols[ t ] ) + "\t";
-			str += "\n";
+				str += this.ep( this.states[ s ], this.symbols[ t ] ) + '\t';
+			str += '\n';
 		}
 
-		str += "\nInitial:\n";
+		str += '\nInitial:\n';
 		for ( s in this.states )
-			str += this.states[ s ] + ":\t" +
-				this.ip( this.states[ s ] ) + "\n";
-		str += "\nFinal: " + this.finalState;
+			str += this.states[ s ] + ':\t' + this.ip( this.states[ s ] ) + '\n';
+		str += '\nFinal: ' + this.finalState;
 
 		return str;
 	};
@@ -207,14 +200,11 @@ module.exports = function (
 		var shouldRepeat = true;
 
 		while ( shouldRepeat ) {
-
 			var initials = {},
 				transitions = {},
 				symbols = {},
-				path,
-				transition,
-				i, j, src, dst, prob, sum, item, sym,
-				original = {
+				path, transition, i, j,
+				src, dst, prob, sum, item, sym, original = {
 					st: this.states,
 					sy: this.symbols,
 					fs: this.finalState,
@@ -225,8 +215,7 @@ module.exports = function (
 
 			if ( paths === undefined ) {
 				paths = [];
-				for ( i in items )
-					paths.push( this.viterbi( items[ i ] ).path );
+				for ( i in items ) paths.push( this.viterbi( items[ i ] ).path );
 			}
 
 			this.finalState = 'F';
@@ -249,18 +238,13 @@ module.exports = function (
 				for ( j = 0; j < path.length - 1; j++ ) {
 					src = path[ j ];
 					dst = path[ j + 1 ];
-					if ( !sum[ src ] )
-						sum[ src ] = 0;
+					if ( !sum[ src ] ) sum[ src ] = 0;
 					sum[ src ]++;
-					if ( !transitions[ src ] )
-						transitions[ src ] = {};
-					if ( !transitions[ src ][ dst ] )
-						transitions[ src ][ dst ] = 0;
+					if ( !transitions[ src ] ) transitions[ src ] = {};
+					if ( !transitions[ src ][ dst ] ) transitions[ src ][ dst ] = 0;
 					transitions[ src ][ dst ]++;
-					if ( !symbols[ src ] )
-						symbols[ src ] = {};
-					if ( !symbols[ src ][ item[ j ] ] )
-						symbols[ src ][ item[ j ] ] = 0;
+					if ( !symbols[ src ] ) symbols[ src ] = {};
+					if ( !symbols[ src ][ item[ j ] ] ) symbols[ src ][ item[ j ] ] = 0;
 					symbols[ src ][ item[ j ] ]++;
 				}
 			}
@@ -286,8 +270,7 @@ module.exports = function (
 			shouldRepeat = original.st !== this.states;
 			shouldRepeat = shouldRepeat || original.sy !== this.symbols;
 			shouldRepeat = shouldRepeat || original.fs !== this.finalState;
-			shouldRepeat = shouldRepeat ||
-				original.ip !== this.initialProbability;
+			shouldRepeat = shouldRepeat || original.ip !== this.initialProbability;
 			shouldRepeat = shouldRepeat ||
 				original.tp !== JSON.stringify( this.transitionProbability );
 			shouldRepeat = shouldRepeat ||
@@ -316,8 +299,7 @@ module.exports = function (
 				if ( this.symbols.indexOf( items[ i ][ j ] ) < 0 )
 					this.symbols.push( items[ i ][ j ] );
 
-		for ( i = 1; i <= n; i++ )
-			this.states.push( '' + i );
+		for ( i = 1; i <= n; i++ ) this.states.push( '' + i );
 		this.states.push( this.finalState );
 
 		for ( i in items ) {
@@ -407,13 +389,15 @@ module.exports = function (
 		max = [ 0, null ];
 		for ( i = 0; i < this.states.length; i++ ) {
 			state = this.states[ i ];
-			if ( V[ item.length ] ) calc = V[ item.length ][ state ];
-			else calc = 0;
+			if ( V[ item.length ] )
+				calc = V[ item.length ][ state ];
+			else
+				calc = 0;
 			if ( calc > max[ 0 ] ) max = [ calc, state ];
 		}
 
 		return {
-			probability: max[ 0 ].toFixed( 6 ),
+			probability: parseFloat( max[ 0 ].toFixed( 6 ) ),
 			path: path[ max[ 1 ] ]
 		};
 	};
@@ -431,29 +415,37 @@ module.exports = function (
 	 *                             of this markov model generating given item.
 	 */
 	this.forwardProbability = function ( item, state ) {
-		var i,
-			c,
-			s = item[ 0 ],
+		var i, c, s = item[ 0 ],
 			rest = item.slice( 1 ),
 			probability = 0;
 
-		if ( state === undefined )
+		if ( state === undefined ) {
 			for ( i in this.initialProbability ) {
-				c = this.ep( state, s ) * this.ip( state );
-				if ( c < this.ep( i, s ) * this.ip( i ) )
-					state = i;
+				if ( this.ep( i, s ) * this.ip( i ) > 0 ) {
+					if ( item.length === 1 )
+						probability +=
+						this.ep( i, s ) * this.ip( i ) * this.tp( state, this.finalState );
+					else
+						for ( j in this.states ) {
+							var tpp = this.tp( i, this.states[ j ] );
+							var tpfp = this.forwardProbability( rest, this.states[ j ] );
+							probability += this.ep( i, s ) * tpp * tpfp;
+						}
+				}
 			}
-
-		if ( item.length === 1 )
-			return this.ep( state, s ) * this.tp( state, this.finalState );
-
-		for ( i in this.states ) {
-			var tpp = this.tp( state, this.states[ i ] );
-			var tpfp = this.forwardProbability( rest, this.states[ i ] );
-			probability += tpp * tpfp;
+		} else {
+			if ( item.length === 1 )
+				probability = this.tp( state, this.finalState );
+			else
+				for ( i in this.states ) {
+					var tpp = this.tp( state, this.states[ i ] );
+					var tpfp = this.forwardProbability( rest, this.states[ i ] );
+					probability += tpp * tpfp;
+				}
+			probability *= this.ep( state, s );
 		}
 
-		return ( probability * this.ep( state, s ) ).toFixed( 6 );
+		return parseFloat( probability.toFixed( 6 ) );
 	};
 
 	/**
