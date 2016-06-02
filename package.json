@@ -9,6 +9,7 @@
 		"istanbul": "~0.4.3"
 	},
 	"name": "HiddenMarkovModel",
+	"description": "Simple Hidden Markov Model implementation",
 	"keywords": [
 		"hidden",
 		"markov",
