@@ -18,7 +18,7 @@
 	"version": "0.0.2",
 	"author": "Lluís Ulzurrun de Asanza Sàez <me@llu.is> (http://llu.is)",
 	"license": "MIT",
-	"repository": "sumolari/hmm",
+	"repository": "Sumolari/hmm",
 	"files": [
 		"index.js"
 	],
