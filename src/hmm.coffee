@@ -1,6 +1,3 @@
-
-_ = require 'lodash'
-
 ###
 A Hidden Markov Model implementation in Javascript.
 ###
@@ -32,6 +29,7 @@ class HMM
 
   ###
   Returns the initial probability of given state.
+  @private
 
   @param [String] state State whose initial probability will be retrieved.
   @return [Float] Probability that the initial state is given one.
@@ -42,6 +40,7 @@ class HMM
   ###
   Returns the probability of moving from given source state to given destination
   state.
+  @private
 
   @param [String] source Initial state.
   @param [String] target Destination state.
@@ -53,6 +52,7 @@ class HMM
 
   ###
   Returns the probability that given state emits given symbol.
+  @private
 
   @param [String] state State that will be emitting the symbol.
   @param [String] symbol Symbol that should be emitted.
@@ -138,12 +138,12 @@ class HMM
       @emissionProbability = {}
 
       for path in paths
-        head = _.head path
+        head = path[0]
         initials[ head ] ?= 0
         initials[ head ]++
 
-      for state in initials
-        @initialProbability[ state ] = initials[ state ] / paths.length
+      for state, count of initials
+        @initialProbability[ state ] = count / paths.length
 
       sum = {}
       for path, index in paths
@@ -236,7 +236,7 @@ class HMM
     path = {}
 
     for state in @states
-      V[ 0 ][ state ] = @ip( state ) * @ep( state, _.head item )
+      V[ 0 ][ state ] = @ip( state ) * @ep( state, item[0] )
       path[ state ] = [ state ]
 
     for t in [1...item.length]
@@ -248,10 +248,10 @@ class HMM
         for source in @states
           tep = @tp( source, target ) * @ep( target, item[ t ] )
           calc = V[ t - 1 ][ source ] * tep
-          max = [ calc, source ] if calc >= _.head max
+          max = [ calc, source ] if calc >= max[0]
 
-        V[ t ][ target ] = _.head max
-        newpath[ target ] = path[ _.last max ].concat target
+        V[ t ][ target ] = max[0]
+        newpath[ target ] = path[ max[1] ].concat target
 
       path = newpath
 
@@ -261,23 +261,24 @@ class HMM
     max = [ 0, null ]
     for source in @states
       calc = V[ t - 1 ][ source ] * @tp source, @finalState
-      max = [ calc, source ] if calc >= _.head max
+      max = [ calc, source ] if calc >= max[0]
 
-    V[ item.length ][ @finalState ] = _.head max
-    path[ @finalState ] = path[ _.last max ].concat @finalState
+    V[ item.length ][ @finalState ] = max[0]
+    path[ @finalState ] = path[ max[1] ].concat @finalState
 
     max = [ 0, null ]
     for state in @states
       calc = V[ item.length ][ state ] ? 0
-      max = [ calc, state ] if calc >= _.head max
+      max = [ calc, state ] if calc >= max[0]
 
     return {
-      probability: parseFloat _.head( max ).toFixed 6
-      path: path[ _.last max ]
+      probability: parseFloat max[0].toFixed 6
+      path: path[ max[1] ]
     }
 
   ###
   Returns the real probability of this model generating given item.
+  @private
 
   @param [Array<String>] item Item whose generation probability will be returned.
   @param [String] state Optional. Initial state for computation. If no state is
@@ -285,8 +286,8 @@ class HMM
   @return [Float] Real probability of this markov model generating given item.
   ###
   forwardProbability: (item, state) ->
-    symbol = _.head item
-    rest = _.tail item
+    symbol = item[0]
+    rest = item.slice 1
     probability = 0
 
     getSequenceProbability = (source, sequence) =>

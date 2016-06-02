@@ -1,8 +1,8 @@
-This module implements a Hidden Markov Model featuring methods to obtain the real generation probability and Viterbi approximations as well as methods to initialize and/or reestimate a HMM given a set of generated items with Viterbi re-estimation and linear segmentation.
+This module implements a **Hidden Markov Model** featuring methods to obtain the real generation probability and Viterbi approximations as well as methods to initialize and/or reestimate a HMM given a set of generated items with Viterbi re-estimation and linear segmentation.
 
 # Dependencies
 
-Although the implementation itself does not require any additional module you'll need Mocha to run the tests.
+Implementation itself depends on **no additional module**.
 
 # Usage
 
@@ -113,9 +113,44 @@ F:	0
 Final: F
 ```
 
-# Tasks
+# Development
 
-There are 2 Make tasks provided:
+You'll need to install development dependencies:
 
-* `make test` will run Mocha tests.
-* `make doc` will create the documentation folder (`doc`). You'll need Yuidoc to get the documentation.
+```bash
+npm install --only=dev
+```
+
+## Generating documentation
+
+Documentation can be generated running:
+
+```bash
+npm run-script doc
+```
+
+HTML documentation will be available in `doc` folder.
+
+## Building from Coffeescript source
+
+Although this module is shipped already built you can build it again from CoffeeScript sources running:
+
+```bash
+npm run-script prepublish
+```
+
+## Running tests
+
+You can also run the tests and get coverage information. To run the tests on CoffeeScript source just run:
+
+```bash
+npm test
+```
+
+If you want to generate additional coverage information run:
+
+```bash
+npm run-script test-cov
+```
+
+And then you'll find coverage information in `coverage` folder.

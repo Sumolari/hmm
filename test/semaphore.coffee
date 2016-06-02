@@ -1,7 +1,7 @@
 # Dependencies.
 
 expect = require( 'chai' ).expect
-hmm = require '../'
+hmm = require '../src/hmm'
 model = {}
 case_1 =
   item: [ 'b', 'c', 'b', 'a' ]
@@ -57,7 +57,7 @@ describe 'Semaphore model', ->
   it 'Possible sequence should have a ≥ 0 probability', ( done ) ->
     sequence = [ 'go', 'stop', 'go' ]
     expect( model.viterbiApproximation sequence ).to.be.above 0
-    expect( model.forwardProbability sequence ).to.be.above 0
+    expect( model.generationProbability sequence ).to.be.above 0
     done()
 
   it 'Possible sequence should return an optimal state sequence', (done) ->

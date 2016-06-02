@@ -1,7 +1,7 @@
 # Dependencies.
 
 expect = require( 'chai' ).expect
-hmm = require '../'
+hmm = require '../src/hmm'
 model = {}
 case_1 =
   item: [ 'b', 'c', 'b', 'a' ]
@@ -60,7 +60,7 @@ describe 'Hidden Markov Model', ->
     done()
 
   it 'Forward Probabilty returns real probability', ( done ) ->
-    expect( model.forwardProbability case_1.item ).to.be.equal case_1.forward
+    expect( model.generationProbability case_1.item ).to.be.equal case_1.forward
     done()
 
   it 'Viterbi Approximation returns approximated probability even if it
@@ -70,7 +70,7 @@ describe 'Hidden Markov Model', ->
 
   it 'Forward Probabilty returns real probability even if it is not
        possible to generate that item', ( done ) ->
-      expect( model.forwardProbability case_2.item ).to.be.equal case_2.forward
+      expect( model.generationProbability case_2.item ).to.be.equal case_2.forward
       done()
 
   it 'Viterbi Approximation returns approximated probability even if it
@@ -80,14 +80,14 @@ describe 'Hidden Markov Model', ->
 
   it 'Forward Probabilty returns real probability even if it has non existing
        symbols', ( done ) ->
-      expect( model.forwardProbability case_3.item ).to.be.equal case_3.forward
+      expect( model.generationProbability case_3.item ).to.be.equal case_3.forward
       done()
 
   it 'After reestimating the model with one sample the probability of
        generating that sample is higher', ( done ) ->
       model.reestimate [ case_1.item ]
       expect( model.viterbiApproximation case_1.item ).to.be.equal case_1.trained
-      expect( model.forwardProbability case_1.item ).to.be.equal case_1.trained
+      expect( model.generationProbability case_1.item ).to.be.equal case_1.trained
       done()
 
   it 'After initialising the model with a sample the probability of generating
@@ -95,7 +95,7 @@ describe 'Hidden Markov Model', ->
       model = new hmm()
       model.initialize [ case_4.item ], case_4.n
       expect( model.viterbiApproximation case_4.item ).to.be.equal case_4.trained
-      expect( model.forwardProbability case_4.item ).to.be.equal case_4.trained
+      expect( model.generationProbability case_4.item ).to.be.equal case_4.trained
       done()
 
   it 'After initialising the model with some samples the probability of any one
@@ -105,5 +105,5 @@ describe 'Hidden Markov Model', ->
       model.initialize cases, cases.length
       for i in cases
         expect( model.viterbiApproximation i ).to.be.above 0
-        expect( model.forwardProbability i ).to.be.above 0
+        expect( model.generationProbability i ).to.be.above 0
       done()

@@ -1,10 +1,10 @@
 {
-	"dependencies": {
-		"coffee-script": "~1.10.0",
-		"lodash": "~4.13.1"
-	},
+	"dependencies": {},
 	"devDependencies": {
+		"coffee-script": "~1.10.0",
 		"chai": "~3.5.0",
+		"codo": "~2.1.0",
+		"coffee-coverage": "^1.0.1",
 		"mocha": "~2.5.3"
 	},
 	"name": "HiddenMarkovModel",
@@ -23,9 +23,10 @@
 		"index.js"
 	],
 	"scripts": {
-		"test": "./node_modules/mocha/bin/mocha -R spec -u bdd --compilers coffee:coffee-script/register",
-		"test-cov": "istanbul cover node_modules/mocha/bin/_mocha -- --reporter dot --compilers coffee:coffee-script/register",
-		"test-travis": "istanbul cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter dot --compilers coffee:coffee-script/register",
-		"doc": "yuidoc -x node_modules -o doc ."
+		"prepublish": "./node_modules/coffee-script/bin/coffee -c -o lib src",
+		"test": "./node_modules/mocha/bin/mocha --recursive --compilers coffee:coffee-script/register --require coffee-coverage/register-istanbul test",
+		"test-cov": "npm test && ./node_modules/.bin/istanbul report",
+		"test-travis": "./node_modules/istanbul/lib/cli.js cover node_modules/mocha/bin/_mocha --report lcovonly -- --reporter dot --compilers coffee:coffee-script/register --require coffee-coverage/register-istanbul",
+		"doc": "node_modules/codo/bin/codo src/hmm.coffee"
 	}
 }
