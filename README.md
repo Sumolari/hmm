@@ -1,3 +1,9 @@
+[![NPM version][npm-image]][npm-url]
+[![Build status][travis-image]][travis-url]
+[![Test coverage][coveralls-image]][coveralls-url]
+[![License][license-image]][license-url]
+[![Downloads][downloads-image]][downloads-url]
+
 This module implements a **Hidden Markov Model** featuring methods to obtain the real generation probability and Viterbi approximations as well as methods to initialize and/or reestimate a HMM given a set of generated items with Viterbi re-estimation and linear segmentation.
 
 # Dependencies
@@ -154,3 +160,14 @@ npm run-script test-cov
 ```
 
 And then you'll find coverage information in `coverage` folder.
+
+[npm-image]: https://img.shields.io/npm/v/HiddenMarkovModel.svg?style=flat-square
+[npm-url]: https://npmjs.org/package/HiddenMarkovModel
+[travis-image]: https://img.shields.io/travis/Sumolari/hmm.svg?style=flat-square
+[travis-url]: https://travis-ci.org/Sumolari/hmm
+[coveralls-image]: https://img.shields.io/coveralls/Sumolari/hmm.svg?style=flat-square
+[coveralls-url]: https://coveralls.io/r/Sumolari/hmm
+[license-image]: http://img.shields.io/npm/l/HiddenMarkovModel.svg?style=flat-square
+[license-url]: https://opensource.org/licenses/MIT
+[downloads-image]: http://img.shields.io/npm/dm/HiddenMarkovModel.svg?style=flat-square
+[downloads-url]: https://npmjs.org/package/HiddenMarkovModel
