@@ -1,11 +1,12 @@
 {
 	"dependencies": {},
 	"devDependencies": {
-		"coffee-script": "~1.10.0",
 		"chai": "~3.5.0",
 		"codo": "~2.1.0",
 		"coffee-coverage": "^1.0.1",
-		"mocha": "~2.5.3"
+		"coffee-script": "~1.10.0",
+		"mocha": "~2.5.3",
+		"istanbul": "~0.4.3"
 	},
 	"name": "HiddenMarkovModel",
 	"keywords": [
