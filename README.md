@@ -127,6 +127,8 @@ You'll need to install development dependencies:
 npm install --only=dev
 ```
 
+If using yarn you'll have to give it `--ignore-engines` flag as [codo forces an old version of Node engine](https://github.com/coffeedoc/codo/issues/260) although it works with newer versions.
+
 ## Generating documentation
 
 Documentation can be generated running:
